@@ -1,5 +1,5 @@
 /*
-	SECURIFI KEY FOB
+	SECURIFI KEY FOB - https://community.hubitat.com/t/securifi-key-fob
 	Kevin Tierney
 	
 	manufacturer : Sercomm Corp.
@@ -14,23 +14,12 @@
 	stage : 4
  	
 	
-	Notes from VEECEEOH
-	
-	The most important thing we need out of all of that is that messages tagged as cluster: 0501 contain the button number information, and the first byte of the data (e.g., 00 corresponds to which button was pressed).
 
-	With that in mind here are the changes I made to your code:
-		
-		changed if (description?.startsWith('catchall:')) to if (cluster == "0501") because the Hubitat will receive button press messages tagged as cluster 0501
-		on button push (cluster = 0501) the first byte of the value: portion of the message are sent to buttonPush() to create the event map that is sent to the hub
-		buttonPush() now uses two list arrays to map the Securifi button numbering to their names and their respective Hubitat button numbering
-		buttonPush() now returns a map back to parse() which calls createEvent()
-		If I was wrong about the cluster: 0501 message, it should be fairly easy to fix by looking at the debug log messages when you press the buttons.
 	*/
 
 metadata {
     definition (name: "Securifi Key Fob", namespace: "hubitat", author: "Kevin Tierney") {
         capability "PushableButton"
-
         fingerprint profileId: "0104", inClusters: "0000,0003,0500", outClusters: "0003,0501", manufacturer: "Sercomm Corp.", model: "SZ-KFB01", deviceJoinName: "Securifi Key Fob"
     }
 
