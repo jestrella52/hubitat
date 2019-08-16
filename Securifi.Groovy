@@ -13,10 +13,7 @@ preferences {
 }
 
 
-def getClusters() { 
-     "zdo active 0x${device.deviceNetworkId}" 
-       log.debug "Get Clusters Called";
-}
+
 
 
 
