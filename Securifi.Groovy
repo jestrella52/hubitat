@@ -29,38 +29,44 @@ def parse(String description) {
       ZoneStatus zs = zigbee.parseZoneStatus(description)
       if (logEnable) log.debug zs
     } else {
-
       def descMap = zigbee.parseDescriptionAsMap(description)
-      if (logEnable) log.debug "zigbee.parseDescriptionAsMap-read attr: ${descMap}"
-      def cluster = descMap.clusterId
-      if (logEnable) log.debug "cluster: ${cluster}"
+	  if descMap.profileid = '0000' return      
+	  if (logEnable) log.debug "Parsed Zigbee Map: ${descMap}"
       
+	  def cluster = descMap.clusterId
       def sourceEndpoint = descMap.sourceEndpoint
-      if (logEnable) log.debug "sourceEndpoint: ${sourceEndpoint}"
-      
       def button = descMap.data[0]
-      if (logEnable) log.debug "button: ${button}"
+      
+	  if (logEnable) log.debug "Cluster: ${cluster} Source Endpoint: ${sourceEndpoint} Button: ${button}"
+	  
+	  //PROCESS BUTTON PRESS
+	  
     }
 }
 }
 
 def configure(){
- String zigbeeId = swapEndianHex(device.hub.zigbeeId)
-      log.debug "Config Called"
-    def configCmds = [
-  "zcl global write 0x500 0x10 0xf0 {${zigbeeId}}", "delay 200",
-    "send 0x${device.deviceNetworkId} 0x08 1", "delay 1500",
-    "zdo bind 0x${device.deviceNetworkId} 0x08 0x01 0x0501 {${device.zigbeeId}} {}", "delay 500",
-      "zdo bind 0x${device.deviceNetworkId} 0x08 1 1 {${device.zigbeeId}} {}"
-    ] 
-    return configCmds
+	log.debug "Config Called"
+	String hubZigbeeId = swapEndianHex(device.hub.zigbeeId)
+	def configCmds = [
+		//------IAS Zone/CIE setup------//
+		//zcl global write [cluster:2] [attributeId:2] [type:4] [data:-1]
+		"zcl global write 0x500 0x10 0xf0 {${hubZigbeeId}}", "delay 200",
+		"send 0x${device.deviceNetworkId} 0x08 1", "delay 1500",
 
-
+		//------Set up binding------//
+		//zdo bind Dev_Nework_ID Src_Endpoint Dest_Endpoint Cluster Zigbee_ID
+		"zdo bind 0x${device.deviceNetworkId} 0x08 0x01 0x0501 {${device.zigbeeId}} {}", "delay 500",
+		//**Do we need this
+		"zdo bind 0x${device.deviceNetworkId} 0x08 1 1 {${device.zigbeeId}} {}"
+	] 
+	return configCmds
 }
 
 private String swapEndianHex(String hex) {
     reverseArray(hex.decodeHex()).encodeHex()
 }
+
 private byte[] reverseArray(byte[] array) {
     int i = 0;
     int j = array.length - 1;
